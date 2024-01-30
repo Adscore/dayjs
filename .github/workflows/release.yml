@@ -21,7 +21,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*' # semantic-release requires Node >= 18
+          node-version: '20.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@adscore'
       - name: Install dependencies
         run: npm clean-install
       - name: Build

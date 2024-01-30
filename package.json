@@ -1,5 +1,5 @@
 {
-  "name": "dayjs",
+  "name": "@adscore/dayjs",
   "version": "0.0.0-development",
   "description": "2KB immutable date time library alternative to Moment.js with the same modern API ",
   "main": "dayjs.min.js",

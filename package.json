@@ -43,12 +43,12 @@
     "immutable",
     "moment"
   ],
-  "author": "iamkun",
+  "author": "asdcore",
   "license": "MIT",
   "homepage": "https://day.js.org",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iamkun/dayjs.git"
+    "url": "https://github.com/Adscore/dayjs.git"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.44",

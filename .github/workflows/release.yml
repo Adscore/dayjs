@@ -1,51 +1,44 @@
-name: Release
-
+name: Publish package to GitHub Packages after merged to master
 on:
-  workflow_run:
-    workflows: ['Lint & Unit Test']
-    branches: [master]
-    types:
-      - completed
-      
-permissions:
-  contents: read # for checkout
-
+  push:
+    branches:
+      - master
 jobs:
-  release:
-    env: 
-      GITHUB_TRIGGER_REF: ${{ github.event.workflow_run.head_branch }} # For workflow_run the GITHUB_REF is the default branch, as mentioned in the docs 
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    name: Release
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+
     permissions:
-      contents: write # to be able to publish a GitHub release
-      issues: write # to be able to comment on released issues
-      pull-requests: write # to be able to comment on released pull requests
-      id-token: write # to enable use of OIDC for npm provenance
+      contents: read
+      packages: write
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4.1.1
         with:
-          fetch-depth: 0
-          ref: ${{ env.GITHUB_TRIGGER_REF }}
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+          ref: ${{ github.ref }}
+      # Setup .npmrc file to publish to GitHub Packages
+      - uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*' # semantic-release requires Node >= 18
-      - name: Install dependencies
-        run: npm clean-install
-      - name: Build
-        env: # temporary workaround for "Error: error:0308010C:digital envelope routines::unsupported" in Node lts / 18
-          NODE_OPTIONS: --openssl-legacy-provider
-        run: npm run build && npm run babel
-      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
-        run: npm audit signatures
-      - name: Release
+          node-version: '20.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@adscore'
+      - name: Cache node modules
+        id: cache-nodemodules
+        uses: actions/cache@v3.3.2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          npm install -g @semantic-release/changelog @semantic-release/git semantic-release 
-          GITHUB_REF=${{ env.GITHUB_TRIGGER_REF }} semantic-release
-          echo release success
-          curl -s ${{ secrets.GITEE_SYNC_URL }}
+          cache-name: cache-node-modules
+        with:
+          # caching node_modules
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - name: Install node modules
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        run: npm ci
+      # Build the lib
+      - run: npm run build && npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,11 +1,8 @@
 name: Release
 
 on:
-  workflow_run:
-    workflows: ['Lint & Unit Test']
-    branches: [master]
-    types:
-      - completed
+  release:
+    types: [created]
       
 permissions:
   contents: read # for checkout

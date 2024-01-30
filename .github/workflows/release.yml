@@ -13,32 +13,29 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v4.1.1
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
-      # Setup .npmrc file to publish to GitHub Packages
-      - uses: actions/setup-node@v4
+          fetch-depth: 0
+          ref: ${{ env.GITHUB_TRIGGER_REF }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@adscore'
-      - name: Cache node modules
-        id: cache-nodemodules
-        uses: actions/cache@v3.3.2
+          node-version: 'lts/*' # semantic-release requires Node >= 18
+      - name: Install dependencies
+        run: npm clean-install
+      - name: Build
+        env: # temporary workaround for "Error: error:0308010C:digital envelope routines::unsupported" in Node lts / 18
+          NODE_OPTIONS: --openssl-legacy-provider
+        run: npm run build && npm run babel
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
+      - name: Release
         env:
-          cache-name: cache-node-modules
-        with:
-          # caching node_modules
-          path: node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-      - name: Install node modules
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
-        run: npm ci
-      # Build the lib
-      - run: npm run build && npm publish
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm run build
+          npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{secrets.PERSONAL_TOKEN}}

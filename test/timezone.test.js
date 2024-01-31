@@ -109,3 +109,9 @@ it('clone retains date and timezone for timezone without offset', () => {
   const another = instance.clone()
   expect(another.format()).toEqual(instance.format())
 })
+
+it('start of day doesnt change the date', () => {
+  const instance = dayjs().tz('Europe/London').startOf('day')
+  const another = instance.startOf('day').startOf('day')
+  expect(another.format()).toEqual(instance.format())
+})

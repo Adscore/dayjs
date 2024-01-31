@@ -1,4 +1,4 @@
-import { PluginFunc, ConfigType, QUnitType, OpUnitType } from 'dayjs'
+import { PluginFunc, ConfigType, QUnitType, OpUnitType } from '@adscore/dayjs'
 
 declare const plugin: PluginFunc
 export = plugin

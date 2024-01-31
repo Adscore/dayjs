@@ -1,4 +1,4 @@
-import { PluginFunc, ConfigType } from 'dayjs'
+import { PluginFunc, ConfigType } from '@adscore/dayjs'
 
 declare interface RelativeTimeThreshold {
   l: string

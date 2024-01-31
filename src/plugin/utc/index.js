@@ -69,7 +69,7 @@ export default (option, Dayjs, dayjs) => {
   }
 
   const oldUtcOffset = proto.utcOffset
-  proto.utcOffset = function (input, keepLocalTime, keepTimezone) {
+  proto.utcOffset = function (input, keepLocalTime) {
     const { u } = this.$utils()
     if (u(input)) {
       if (this.$u) {
@@ -90,16 +90,15 @@ export default (option, Dayjs, dayjs) => {
     let ins = this
     if (keepLocalTime) {
       ins.$offset = offset
-      ins.$u = input === 0 && !keepTimezone
+      ins.$u = input === 0
       return ins
     }
-    if (input !== 0 || keepTimezone) {
+    if (input !== 0) {
       const localTimezoneOffset = this.$u
         ? this.toDate().getTimezoneOffset() : -1 * this.utcOffset()
       ins = this.local().add(offset + localTimezoneOffset, MIN)
       ins.$offset = offset
       ins.$x.$localOffset = localTimezoneOffset
-      ins.$u = input === 0 && !keepTimezone
     } else {
       ins = this.utc()
     }

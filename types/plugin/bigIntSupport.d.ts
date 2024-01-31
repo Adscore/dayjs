@@ -1,4 +1,4 @@
-import { PluginFunc } from 'dayjs'
+import { PluginFunc } from '@adscore/dayjs'
 
 declare module 'dayjs' {
   interface ConfigTypeMap {

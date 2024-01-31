@@ -1,4 +1,4 @@
-import { PluginFunc } from 'dayjs'
+import { PluginFunc } from '@adscore/dayjs'
 import { OpUnitType, UnitTypeLongPlural } from 'dayjs';
 
 declare const plugin: PluginFunc
